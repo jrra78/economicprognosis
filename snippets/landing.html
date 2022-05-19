@@ -84,13 +84,18 @@
                     if (isNaN(obsValue)) {obsValue = null} 
                     obs.push([obsDate, obsValue])
                 }
-                for (let j=0;j<obs.length; j++) {
-                    obsDelta.push(obs[j][0], 0)
-                    if (j>0) {
-
-                    }
-                }
             })
+            //
+            obsDelta.push([obsValue[0][0], 0])
+            for (let j=1;j<obs.length; j++) {
+                if (obs[j-1][1] !== null && obs[j][1] !== null) {
+                    delta = obs[j][1]-obs[j-1][1]
+                } else {
+                    delta = null
+                }
+                obsDelta.push([obsValue[j][0], delta])
+            }
+            //
             serieObject = {'id': serie['idSerie'],
                            'name': serie['titulo'],
                            'obs': obs,
