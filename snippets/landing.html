@@ -66,33 +66,59 @@
     <script>
         var apiUrl = 'https://jrra.pythonanywhere.com';
 
-        async function brokerSieApi(seriesInScope) {
+        async function getDataFromBanxicoSIESerie(serie) {
+            console.log(serie)
+            var observations = new Array();
+            let seriesData = serie['datos']
+            console.log(seriesData)
+            seriesData.forEach(async(observation) => {
+                tmpValue = parseFloat(observation['dato'])
+                tmpDate = parseDate(observation['fecha'])
+                if (isNaN(tmpValue)) {
+                    console.log(tmpDate, tmpValue)
+                }
+            })
+            serieObject = {'id': serie['idSerie'],
+                           'name': serie['titulo']}
+            return serieObject
+        }
+        
+
+        async function initialInsight(seriesInScope) {
+
+            function mapBoxId(idSerie) {
+
+            }
+
+            var seriesInScope = 'SF61745,SF331451,SF43783,SF43936,SF43718,SF43707,SP30578,SP74625,SP68257';
             var inputData = {'seriesInScope': seriesInScope};
             var endPoint = apiUrl + '/brokers/sie_api';
-            console.log('API end point: ', endPoint)
-            console.log('data sent: ', JSON.stringify(inputData))
+            var apiResponse = null;
             init = {method: 'POST',
                     body: JSON.stringify(inputData),
                     cache: 'no-cache',
                     headers: new Headers ({'content-type': 'application/json'})}
-            fetch(endPoint, init)
+            var apiResponse = fetch(endPoint, init)
             .then(function(response) {
                 if (response.status === 200) {
                     response.json().then(function(returnedJson) {
                         console.log(returnedJson)
+                        series = returnedJson['bmx']['series']
+                        console.log(series)
+                        series.forEach(async(serie) => {
+                            console.log(serie)
+                            let serieObject = await getDataFromBanxicoSIESerie(serie)
+                            console.log(serieObject)
+                        });
                     });
                 } else {
+                    return null;
                 }
-            });
-        }
-
-        async function fetchSieApi() {
-            var seriesInScope = 'SF61745,SF331451,SF43783,SF43936,SF43718,SF43707,SP30578,SP74625,SP68257';
-            let response = await brokerSieApi(seriesInScope);
-        }
+            })
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchSieApi()
+            initialInsight()
         });
     </script>
 
