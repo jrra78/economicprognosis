@@ -66,20 +66,35 @@
     <script>
         var apiUrl = 'https://jrra.pythonanywhere.com';
 
+        async function getDateFromDDMMYYYY(dateAsString) {
+
+        }
+
         async function getDataFromBanxicoSIESerie(serie) {
             console.log(serie)
-            var observations = new Array();
+            var obs = new Array();
+            var obsDelta = new Array();
             let seriesData = serie['datos']
             console.log(seriesData)
             seriesData.forEach(async(observation) => {
-                tmpValue = parseFloat(observation['dato'])
-                tmpDate = parseDate(observation['fecha'])
-                if (isNaN(tmpValue)) {
-                    console.log(tmpDate, tmpValue)
+                if (observation['fecha'].includes('/')) {
+                    var [day, month, year] = observation['fecha'].split('/')
+                    var obsDate = new Date(+year, month-1, +day);
+                    var obsValue = parseFloat(observation['dato']);
+                    if (isNaN(obsValue)) {obsValue = null} 
+                    obs.push([obsDate, obsValue])
+                }
+                for (let j=0;j<obs; j++) {
+                    obsDelta.push(obs[j][0], 0)
+                    if (j>0) {
+
+                    }
                 }
             })
             serieObject = {'id': serie['idSerie'],
-                           'name': serie['titulo']}
+                           'name': serie['titulo'],
+                           'obs': obs,
+                           'obsDelta': obsDelta}
             return serieObject
         }
         
