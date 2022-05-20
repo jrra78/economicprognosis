@@ -74,6 +74,7 @@
             console.log(serie)
             var obs = new Array();
             var obsDelta = new Array();
+            var obsChange = new Array();
             let seriesData = serie['datos']
             console.log(seriesData)
             seriesData.forEach(async(observation) => {
@@ -86,28 +87,47 @@
                 }
             })
             //
-            obsDelta.push([obsValue[0][0], 0])
+            obsDelta.push([obs[0][0], 0])
             for (let j=1;j<obs.length; j++) {
+                let delta = null;
                 if (obs[j-1][1] !== null && obs[j][1] !== null) {
-                    delta = obs[j][1]-obs[j-1][1]
-                } else {
-                    delta = null
+                    delta = obs[j][1]-obs[j-1][1];
                 }
-                obsDelta.push([obsValue[j][0], delta])
+                obsDelta.push([obs[j][0], delta])
+            }
+            //
+            obsChange.push([obsDelta[0][0], 0])
+            for (let j=1; j<obsDelta.length; j++) {
+                let change = null;
+                if (obsDelta[j][1] !== null && obs[j][1] !== null) {
+                    let sign = Math.sign(obsDelta[j][1])
+                    change = sign*Math.abs(obsDelta[j][1])/Math.abs(obs[j][1]);
+                }
+                obsChange.push([obsDelta[j][0], change])
             }
             //
             serieObject = {'id': serie['idSerie'],
                            'name': serie['titulo'],
+                           'shortName': '',
                            'obs': obs,
-                           'obsDelta': obsDelta}
+                           'obsDelta': obsDelta,
+                           'obsChange':obsChange}
             return serieObject
         }
         
 
         async function initialInsight(seriesInScope) {
 
-            function mapBoxId(idSerie) {
-
+            function mapBoxIdAndShortName(idSerie) {
+                // SF331451 Interbank Equilibrium Interest Rate (TIIE)
+                // SF43783  Interbank Equilibrium Interest Rate (TIIE-28)
+                // SF43707  International reserves in USD
+                // SF61745  Targeted interest rate
+                // SF43718  Exchange Rate - FIX
+                // SF43936  Goverment issued securities (CETES)- 28 days
+                // SP30578  National Consumer Price Index (INPC)- Yearly
+                // SP74625  Underlying National Consumer Price Index (INPC-S))
+                // SP68257   Indexed Unit of Funds (UDI)
             }
 
             var seriesInScope = 'SF61745,SF331451,SF43783,SF43936,SF43718,SF43707,SP30578,SP74625,SP68257';
