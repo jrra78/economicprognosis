@@ -93,9 +93,36 @@
                 }
                 newObsDelta.push([newObs[j][0], delta])
             }
+            //
+            newObsChange.push([newObsDelta[0][0], null])
+            for (let j=1; j<newObsDelta.length; j++) {
+                let change = null;
+                if (newObsDelta[j][1] !== null && newObs[j-1][1] !== null) {
+                    let sign = Math.sign(newObsDelta[j][1])
+                    switch (sign) {
+                        case 1:
+                            change = 100*(-1+Math.abs(newObsDelta[j][1])/Math.abs(newObs[j-1][1]))
+                            break;
+                        case -1:
+                            change = 100*(1-Math.abs(newObsDelta[j][1])/Math.abs(newObs[j-1][1]))
+                            break;
+                        case 0:
+                            change = 0;
+                            break;
+                        case -0:
+                            change = 0;
+                            break;
+                    }
+                    newObsChange.push([newObsDelta[j][0], sign*change])
+                } else  {
+                    newObsChange.push([newObsDelta[j][0], null])
+                }
+            }
+            //
             newSeriesObject = {'newObs': newObs,
-                               'newObsDelta': newObsDelta}
-            console.log(newSeriesObject)
+                               'newObsDelta': newObsDelta,
+                               'newObsChange': newObsChange}
+            console.log('new series object ', newSeriesObject)
             return newSeriesObject;
         }
 
@@ -121,7 +148,7 @@
                 }
             })
             //
-            obsDelta.push([obs[0][0], 0])
+            obsDelta.push([obs[0][0], null])
             for (let j=1;j<obs.length; j++) {
                 let delta = null;
                 if (obs[j-1][1] !== null && obs[j][1] !== null) {
@@ -130,17 +157,17 @@
                 obsDelta.push([obs[j][0], delta])
             }
             //
-            obsChange.push([obsDelta[0][0], 0])
+            obsChange.push([obsDelta[0][0], null])
             for (let j=1; j<obsDelta.length; j++) {
                 let change = null;
-                if (obsDelta[j][1] !== null && obs[j][1] !== null) {
+                if (obsDelta[j][1] !== null && obs[j-1][1] !== null) {
                     let sign = Math.sign(obsDelta[j][1])
                     switch (sign) {
                         case 1:
-                            change = (obsDelta[j][1])/Math.abs(obs[j][1])-1;
+                            change = 100*(-1+Math.abs(obsDelta[j][1])/Math.abs(obs[j-1][1]))
                             break;
                         case -1:
-                            change = 1-(obsDelta[j][1])/Math.abs(obs[j][1]);
+                            change = 100*(1-Math.abs(obsDelta[j][1])/Math.abs(obs[j-1][1]))
                             break;
                         case 0:
                             change = 0;
@@ -148,9 +175,11 @@
                         case -0:
                             change = 0;
                             break;
-                    };
-                };
-                obsChange.push([obsDelta[j][0], change])
+                    }
+                    obsChange.push([obsDelta[j][0], sign*change])
+                } else {
+                    obsChange.push([obsDelta[j][0], null])
+                }
             }
             //
             serieObject = {'id': serie['idSerie'],
@@ -248,10 +277,10 @@
                             let serieId = serieObject['id']
                             if (yearlyIndices.includes(serie['idSerie'])) {
                                 console.log('its an index')
-                                console.log(serieObject['obs'])
+                                console.log('original series ', serieObject['obs'])
                                 let newSeriesObject = await getSeriesFromIndices(serieObject);
                                 serieObject['obs'] = newSeriesObject['newObs'];
-                                console.log(serieObject['obs'])
+                                console.log('new series ', serieObject['obs'])
                             }
                             //
                             console.log(serieObject)
