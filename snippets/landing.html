@@ -72,7 +72,7 @@
 
         async function getDataFromBanxicoSIESerie(serie) {
             console.log(serie)
-            var YearlySeries = ['SP74625'];
+            var yearlyIndices = ['SP74625'];
             var obs = new Array();
             var obsDelta = new Array();
             var obsChange = new Array();
@@ -88,6 +88,10 @@
                 }
             })
             //
+            if (yearlyIndices.includes(serie['idSerie'])) {
+                console.log('its an index')
+            }
+            //
             obsDelta.push([obs[0][0], 0])
             for (let j=1;j<obs.length; j++) {
                 let delta = null;
@@ -97,18 +101,26 @@
                 obsDelta.push([obs[j][0], delta])
             }
             //
-            if (YearlySeries.includes(serie['idSerie'])) {
-
-            } else {
-
-            }
             obsChange.push([obsDelta[0][0], 0])
             for (let j=1; j<obsDelta.length; j++) {
                 let change = null;
                 if (obsDelta[j][1] !== null && obs[j][1] !== null) {
                     let sign = Math.sign(obsDelta[j][1])
-                    change = sign*Math.abs(obsDelta[j][1])/Math.abs(obs[j][1]);
-                }
+                    switch (sign) {
+                        case 1:
+                            change = (obsDelta[j][1])/Math.abs(obs[j][1])-1;
+                            break;
+                        case -1:
+                            change = 1-(obsDelta[j][1])/Math.abs(obs[j][1]);
+                            break;
+                        case 0:
+                            change = 0;
+                            break;
+                        case -0:
+                            change = 0;
+                            break;
+                    };
+                };
                 obsChange.push([obsDelta[j][0], change])
             }
             //
@@ -134,7 +146,7 @@
                 let lastPos = serieObject['obs'].length-1;
                 let lastObsValue = serieObject['obs'][serieObject['obs'].length-1][1];
                 let lastObsDate = serieObject['obs'][serieObject['obs'].length-1][0];
-                console.log(lastPos)
+                //console.log(lastPos)
                 let idInScope = serieObject['id'];
                 switch  (serieObject['id']) {
                     case 'SF61745':
@@ -195,11 +207,11 @@
             .then(function(response) {
                 if (response.status === 200) {
                     response.json().then(function(returnedJson) {
-                        console.log(returnedJson)
+                        //console.log(returnedJson)
                         series = returnedJson['bmx']['series']
-                        console.log(series)
+                        //console.log(series)
                         series.forEach(async(serie) => {
-                            console.log(serie)
+                            //console.log(serie)
                             let serieObject = await getDataFromBanxicoSIESerie(serie)
                             let serieId = serieObject['id']
                             console.log(serieObject)
