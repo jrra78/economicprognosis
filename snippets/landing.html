@@ -72,6 +72,7 @@
 
         async function getDataFromBanxicoSIESerie(serie) {
             console.log(serie)
+            var YearlySeries = ['SP74625'];
             var obs = new Array();
             var obsDelta = new Array();
             var obsChange = new Array();
@@ -81,7 +82,7 @@
                 if (observation['fecha'].includes('/')) {
                     var [day, month, year] = observation['fecha'].split('/')
                     var obsDate = new Date(+year, month-1, +day);
-                    var obsValue = parseFloat(observation['dato']);
+                    var obsValue = parseFloat(observation['dato'].replace(',',''));
                     if (isNaN(obsValue)) {obsValue = null} 
                     obs.push([obsDate, obsValue])
                 }
@@ -96,6 +97,11 @@
                 obsDelta.push([obs[j][0], delta])
             }
             //
+            if (YearlySeries.includes(serie['idSerie'])) {
+
+            } else {
+
+            }
             obsChange.push([obsDelta[0][0], 0])
             for (let j=1; j<obsDelta.length; j++) {
                 let change = null;
@@ -118,17 +124,64 @@
 
         async function initialInsight(seriesInScope) {
 
-            function mapBoxIdAndShortName(idSerie) {
-                // SF331451 Interbank Equilibrium Interest Rate (TIIE)
-                // SF43783  Interbank Equilibrium Interest Rate (TIIE-28)
-                // SF43707  International reserves in USD
-                // SF61745  Targeted interest rate
-                // SF43718  Exchange Rate - FIX
-                // SF43936  Goverment issued securities (CETES)- 28 days
-                // SP30578  National Consumer Price Index (INPC)- Yearly
-                // SP74625  Underlying National Consumer Price Index (INPC-S))
-                // SP68257   Indexed Unit of Funds (UDI)
+            var seriesKeyData = new Array();
+
+
+            async function mapSerietoDict(serieObject) {
+                // 1 - SF61745  
+                let row;
+                let shortName;
+                let lastPos = serieObject['obs'].length-1;
+                let lastObsValue = serieObject['obs'][serieObject['obs'].length-1][1];
+                let lastObsDate = serieObject['obs'][serieObject['obs'].length-1][0];
+                console.log(lastPos)
+                let idInScope = serieObject['id'];
+                switch  (serieObject['id']) {
+                    case 'SF61745':
+                        row = 1;
+                        shortName = 'Targeted interest rate';
+                        break;
+                    case 'SF331451':
+                        row = 2;
+                        shortName = 'Interbank Equilibrium Interest Rate (TIIE)';
+                        break;
+                    case 'SF43783':
+                        row = 3;
+                        shortName = 'Interbank Equilibrium Interest Rate (TIIE-28)';
+                        break;
+                    case 'SF43936':
+                        row = 4;
+                        shortName = 'Goverment issued securities (CETES)- 28 days';
+                        break;
+                    case 'SF43718':
+                        row = 5;
+                        shortName = 'Interbank Equilibrium Interest Rate (TIIE)';
+                        break;
+                    case 'SF43707':
+                        row = 6;
+                        shortName = 'International reserves in USD';
+                        break;
+                    case 'SP30578':
+                        row = 7;
+                        shortName = 'National Consumer Price Index (INPC)- Yearly';
+                        break;
+                    case 'SP74625':
+                        row = 8;
+                        shortName = 'Underlying National Consumer Price Index (INPC-S))';
+                        lastObsValue = 100*((serieObject['obs'][serieObject['obs'].length-1][1])/(serieObject['obs'][serieObject['obs'].length-13][1])-1);
+                        break;
+                    case 'SP68257':
+                        row = 9;
+                        shortName = 'Indexed Unit of Funds (UDI)';
+                };
+   
+                serieKeyDataObject = {'row': row, 'id':serieObject['id'],
+                                      'shortName': shortName,
+                                      'lastObsDate': lastObsDate,
+                                      'lastObsValue': lastObsValue}
+                return serieKeyDataObject;
             }
+
 
             var seriesInScope = 'SF61745,SF331451,SF43783,SF43936,SF43718,SF43707,SP30578,SP74625,SP68257';
             var inputData = {'seriesInScope': seriesInScope};
@@ -148,7 +201,17 @@
                         series.forEach(async(serie) => {
                             console.log(serie)
                             let serieObject = await getDataFromBanxicoSIESerie(serie)
+                            let serieId = serieObject['id']
                             console.log(serieObject)
+                            var checkStorage = sessionStorage.getItem(serieId)
+                            if (checkStorage === null) {
+                                sessionStorage.setItem(serieId, serieObject)
+                            } else {
+                                sessionStorage.removeItem(serieId)
+                            }
+                            //
+                            let serieKeyDataObject = await mapSerietoDict(serieObject)
+                            console.log(serieKeyDataObject)
                         });
                     });
                 } else {
