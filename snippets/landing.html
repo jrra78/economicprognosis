@@ -66,31 +66,60 @@
     <script>
         var apiUrl = 'https://jrra.pythonanywhere.com';
 
-        async function getDateFromDDMMYYYY(dateAsString) {
-
+        async function getSeriesFromIndices(serieObject) {
+            var newObs = new Array();
+            var newObsDelta = new Array();
+            var newObsChange = new Array();
+            //
+            for (let j=0;j<serieObject['obs'].length;j++) {
+                if (j>=12) {
+                    if (serieObject['obs'][j][1] !== null && serieObject['obs'][j-12][1] !== null) {
+                        let delta = serieObject['obs'][j][1]-serieObject['obs'][j-12][1];
+                        let change = 1e2*delta/(serieObject['obs'][j-12][1]);
+                        newObs.push([serieObject['obs'][j][0], change])
+                    } else {
+                        newObs.push([serieObject['obs'][j][0], null])
+                    }
+                } else {
+                    newObs.push([serieObject['obs'][j][0], null])
+                }
+            }
+            //
+            newObsDelta.push([newObs[0][0], null])
+            for (let j=1;j<newObs.length; j++) {
+                let delta = null;
+                if (newObs[j-1][1] !== null && newObs[j][1] !== null) {
+                    delta = newObs[j][1]-newObs[j-1][1];
+                }
+                newObsDelta.push([newObs[j][0], delta])
+            }
+            newSeriesObject = {'newObs': newObs,
+                               'newObsDelta': newObsDelta}
+            console.log(newSeriesObject)
+            return newSeriesObject;
         }
 
         async function getDataFromBanxicoSIESerie(serie) {
             console.log(serie)
-            var yearlyIndices = ['SP74625'];
+            var todayDate = Date.now();
             var obs = new Array();
             var obsDelta = new Array();
             var obsChange = new Array();
             let seriesData = serie['datos']
-            console.log(seriesData)
             seriesData.forEach(async(observation) => {
                 if (observation['fecha'].includes('/')) {
-                    var [day, month, year] = observation['fecha'].split('/')
-                    var obsDate = new Date(+year, month-1, +day);
-                    var obsValue = parseFloat(observation['dato'].replace(',',''));
-                    if (isNaN(obsValue)) {obsValue = null} 
-                    obs.push([obsDate, obsValue])
+                    let [day, month, year] = observation['fecha'].split('/')
+                    let obsDate = new Date(+year, month-1, +day);
+                    if (obsDate<=todayDate) {
+                        let tmpValue = observation['dato'].replace(/,/g,'')
+                        if (isNaN(tmpValue)) {
+                            obs.push([obsDate, null]) 
+                        } else {
+                            obs.push([obsDate, parseFloat(tmpValue)]) 
+                        }
+                    }
                 }
             })
-            //
-            if (yearlyIndices.includes(serie['idSerie'])) {
-                console.log('its an index')
-            }
             //
             obsDelta.push([obs[0][0], 0])
             for (let j=1;j<obs.length; j++) {
@@ -144,8 +173,10 @@
                 let row;
                 let shortName;
                 let lastPos = serieObject['obs'].length-1;
-                let lastObsValue = serieObject['obs'][serieObject['obs'].length-1][1];
-                let lastObsDate = serieObject['obs'][serieObject['obs'].length-1][0];
+                let lastObsValue;
+                let lastObsDate;
+                //let lastObsValue = serieObject['obs'][serieObject['obs'].length-1][1];
+                //let lastObsDate = serieObject['obs'][serieObject['obs'].length-1][0];
                 //console.log(lastPos)
                 let idInScope = serieObject['id'];
                 switch  (serieObject['id']) {
@@ -180,7 +211,7 @@
                     case 'SP74625':
                         row = 8;
                         shortName = 'Underlying National Consumer Price Index (INPC-S))';
-                        lastObsValue = 100*((serieObject['obs'][serieObject['obs'].length-1][1])/(serieObject['obs'][serieObject['obs'].length-13][1])-1);
+                        //lastObsValue = 100*((serieObject['obs'][serieObject['obs'].length-1][1])/(serieObject['obs'][serieObject['obs'].length-13][1])-1);
                         break;
                     case 'SP68257':
                         row = 9;
@@ -196,6 +227,7 @@
 
 
             var seriesInScope = 'SF61745,SF331451,SF43783,SF43936,SF43718,SF43707,SP30578,SP74625,SP68257';
+            var yearlyIndices = ['SP74625'];
             var inputData = {'seriesInScope': seriesInScope};
             var endPoint = apiUrl + '/brokers/sie_api';
             var apiResponse = null;
@@ -214,6 +246,14 @@
                             //console.log(serie)
                             let serieObject = await getDataFromBanxicoSIESerie(serie)
                             let serieId = serieObject['id']
+                            if (yearlyIndices.includes(serie['idSerie'])) {
+                                console.log('its an index')
+                                console.log(serieObject['obs'])
+                                let newSeriesObject = await getSeriesFromIndices(serieObject);
+                                serieObject['obs'] = newSeriesObject['newObs'];
+                                console.log(serieObject['obs'])
+                            }
+                            //
                             console.log(serieObject)
                             var checkStorage = sessionStorage.getItem(serieId)
                             if (checkStorage === null) {
