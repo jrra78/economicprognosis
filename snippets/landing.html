@@ -66,6 +66,8 @@
 
         function plotSeries(id, shortName) {
             console.log(id, shortName)
+            var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
+            document.onreadystatechange = function () {modalWindow.show();};
         }
 
 
