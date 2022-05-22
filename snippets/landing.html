@@ -36,12 +36,12 @@
 
         </main>
 
-        <div class="modal fade" id="modalWindow">
+        <div class="modal fade modal-sm" id="modalWindow">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h4 class="modal-title">Modal Heading</h4>
+                        <h4 id="modalWindowTitle" class="modal-title">Modal Heading</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -63,11 +63,16 @@
         var apiUrl = 'https://jrra.pythonanywhere.com';
         var appContent = document.getElementById('appContent');
         var appLoading = document.getElementById('appLoading');
+        var modalWindowTitle = document.getElementById('modalWindowTitle');
 
         function plotSeries(id, shortName) {
             console.log(id, shortName)
             var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
-            document.onreadystatechange = function () {modalWindow.show();};
+            if (modalWindow) {
+                modalWindow.classList.replace('modal-sm', 'modal-lg')
+                modalWindow.show();
+                modalWindowTitle.innerText = shortName;
+            }
         }
 
 
@@ -251,7 +256,7 @@
                         break;
                     case 'SF43718':
                         row = 5;
-                        shortName = 'Interbank Equilibrium Interest Rate (TIIE)';
+                        shortName = 'Exchange rate Fix (MXN per USD)';
                         break;
                     case 'SF43707':
                         row = 6;
