@@ -45,7 +45,9 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <div id ="modalWindowBody" class="modal-body"></div>
+                    <div id ="modalWindowBody" class="modal-body">
+
+                    </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
@@ -64,39 +66,31 @@
         var modalWindowTitle = document.getElementById('modalWindowTitle');
         var modalWindowBody = document.getElementById('modalWindowBody');
 
-        function plotSeries(id, shortName) {
+        async function plotSeries(id, shortName) {
 
-            function deleteChildsInModalWindowBody() {
-                var e = document.getElementById('modalWindowBody')
-                var child = e.lastElementChild;
-                while (child) {
-                    e.removeChild(child)
-                    child.lastElementChild;
-                }
-                return true;
-            }
-
-            function addDivs() {
-                var divsToAdd = ['obs', 'obsDelta', 'obsChange'];
+            async function addDivsToModalWindowBody() {
+                var divsToAdd = ['obsPlotCont', 'obsDeltaPlotCont', 'obsChangePlotCont', 'inProgressCont'];
                 for (let j=0; j<divsToAdd.length; j++) {
                     let newDiv = document.createElement('div');
                     newDiv.classList.add('container-fluid');
                     newDiv.id = divsToAdd[j].trim();
                     modalWindowBody.appendChild(newDiv)
                 }
+                return true
             }
 
             console.log(id, shortName)
+            var result;
             var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
             if (modalWindow) {
-                deleteChildsInModalWindowBody();
-                addDivs();
+                modalWindow.show();
+                result = await deleteChildsInModalWindowBody();
+                result = await addDivs();
                 console.log(id)
                 if (sessionStorage.getItem(id) !== null) {
                     let serieInScope = sessionStorage.getItem(id);
                     console.log(serieInScope)
                 }
-                modalWindow.show();
                 modalWindowTitle.innerText = id + ' - ' + shortName;
             }
         }
