@@ -67,7 +67,17 @@
         var modalWindowBody = document.getElementById('modalWindowBody');
 
         async function plotSeries(id, shortName) {
-
+            
+            async function deleteChildsInModalWindowBody() {
+                if (modalWindowBody.hasChildNodes()==true) {
+                    while (modalWindowBody.hasChildNodes()) {
+                        let child = modalWindowBody.firstElementChild;
+                        console.log(child.id)
+                        modalWindowBody.removeChild(child)
+                    }
+                }
+                return true
+            }
             async function addDivsToModalWindowBody() {
                 var divsToAdd = ['obsPlotCont', 'obsDeltaPlotCont', 'obsChangePlotCont', 'inProgressCont'];
                 for (let j=0; j<divsToAdd.length; j++) {
@@ -83,6 +93,7 @@
             var result;
             var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
             if (modalWindow) {
+                modalWindowTitle.innerText = id + ' - ' + shortName;
                 modalWindow.show();
                 result = await deleteChildsInModalWindowBody();
                 result = await addDivs();
@@ -91,7 +102,7 @@
                     let serieInScope = sessionStorage.getItem(id);
                     console.log(serieInScope)
                 }
-                modalWindowTitle.innerText = id + ' - ' + shortName;
+               
             }
         }
 
