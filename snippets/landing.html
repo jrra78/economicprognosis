@@ -71,9 +71,11 @@
             async function deleteChildsInModalWindowBody() {
                 if (modalWindowBody.hasChildNodes()==true) {
                     while (modalWindowBody.hasChildNodes()) {
-                        let child = modalWindowBody.firstElementChild;
-                        console.log(child.id)
-                        modalWindowBody.removeChild(child)
+                        let child = modalWindowBody.lastElementChild;
+                        if (child !== null) {
+                            console.log(child.id)
+                            modalWindowBody.removeChild(child)
+                        }
                     }
                 }
                 return true
