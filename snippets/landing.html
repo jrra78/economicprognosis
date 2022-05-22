@@ -272,9 +272,13 @@
                             }
                             //
                             let serieKeyDataObject = await mapSerietoDict(serieObject)
-                            seriesKeyData.push([serieKeyDataObject])
+                            seriesKeyData.push(serieKeyDataObject)
                         });
                         console.log(seriesKeyData)
+                        let sortedSeriesKeyData = seriesKeyData.sort(function(a, b) {
+                            return a.row-b.row;
+                        });
+                        console.log(sortedSeriesKeyData)
                     });
                 } else {
                     return null;
