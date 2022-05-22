@@ -36,8 +36,8 @@
 
         </main>
 
-        <div class="modal fade modal-sm" id="modalWindow">
-            <div class="modal-dialog modal-lg">
+        <div class="modal fade" id="modalWindow">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
 
                     <div class="modal-header">
@@ -45,9 +45,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <div class="modal-body">
-                        Modal body..
-                    </div>
+                    <div id ="modalWindowBody" class="modal-body"></div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
@@ -64,14 +62,42 @@
         var appContent = document.getElementById('appContent');
         var appLoading = document.getElementById('appLoading');
         var modalWindowTitle = document.getElementById('modalWindowTitle');
+        var modalWindowBody = document.getElementById('modalWindowBody');
 
         function plotSeries(id, shortName) {
+
+            function deleteChildsInModalWindowBody() {
+                var e = document.getElementById('modalWindowBody')
+                var child = e.lastElementChild;
+                while (child) {
+                    e.removeChild(child)
+                    child.lastElementChild;
+                }
+                return true;
+            }
+
+            function addDivs() {
+                var divsToAdd = ['obs', 'obsDelta', 'obsChange'];
+                for (let j=0; j<divsToAdd.length; j++) {
+                    let newDiv = document.createElement('div');
+                    newDiv.classList.add('container-fluid');
+                    newDiv.id = divsToAdd[j].trim();
+                    modalWindowBody.appendChild(newDiv)
+                }
+            }
+
             console.log(id, shortName)
             var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
             if (modalWindow) {
-                modalWindow.classList.replace('modal-sm', 'modal-lg')
+                deleteChildsInModalWindowBody();
+                addDivs();
+                console.log(id)
+                if (sessionStorage.getItem(id) !== null) {
+                    let serieInScope = sessionStorage.getItem(id);
+                    console.log(serieInScope)
+                }
                 modalWindow.show();
-                modalWindowTitle.innerText = shortName;
+                modalWindowTitle.innerText = id + ' - ' + shortName;
             }
         }
 
@@ -194,7 +220,7 @@
                 var tableHead = document.createElement('thead')
                 //
                 var columnsInScope = ['serie<br>id', 'descripcion<br>&nbsp;', 'current<br>date', 'current<br>value',
-                                      'previous date', 'previous Value', 'delta<br>&nbsp;', 'change<br>%']
+                                      'previous<br>date', 'previous<br>Value', 'delta<br>&nbsp;', 'change<br>%']
                 for (let j=0; j<columnsInScope.length; j++) {
                     let columnHeader = document.createElement('th');
                     columnHeader.innerHTML = columnsInScope[j]
@@ -339,12 +365,14 @@
                                 serieObject['obsChange'] = newSeriesObject['newObsChange'];
                             }
                             //
-                            //console.log(serieObject)
-                            var checkStorage = sessionStorage.getItem(serieId)
-                            if (checkStorage === null) {
-                                sessionStorage.setItem(serieId, serieObject)
+                            if (sessionStorage.getItem(serieId) === null) {
+                                console.log('does no exists')
+                                console.log(serieObject)
+                                sessionStorage.setItem(serieId, JSON.stringify(serieObject))
                             } else {
+                                console.log('exists')
                                 sessionStorage.removeItem(serieId)
+                                sessionStorage.setItem(serieId, JSON.stringify(serieObject))
                             }
                             //
                             let serieKeyDataObject = await mapSeriesToTable(serieObject)
