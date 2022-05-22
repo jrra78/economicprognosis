@@ -69,18 +69,16 @@
         async function plotSeries(id, shortName) {
             
             async function deleteChildsInModalWindowBody() {
+                console.log('deleting child elements if any')
                 if (modalWindowBody.hasChildNodes()==true) {
-                    while (modalWindowBody.hasChildNodes()) {
-                        let child = modalWindowBody.lastElementChild;
-                        if (child !== null) {
-                            console.log(child.id)
-                            modalWindowBody.removeChild(child)
-                        }
+                    while (modalWindowBody.firstChild) {
+                        modalWindowBody.removeChild(modalWindowBody.firstChild)
                     }
                 }
                 return true
             }
-            async function addDivsToModalWindowBody() {
+
+            async function addContainersToModalWindowBody() {
                 var divsToAdd = ['obsPlotCont', 'obsDeltaPlotCont', 'obsChangePlotCont', 'inProgressCont'];
                 for (let j=0; j<divsToAdd.length; j++) {
                     let newDiv = document.createElement('div');
