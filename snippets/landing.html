@@ -13,6 +13,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
         <!-- Popper and Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Google Charts -->
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         <style>
             /* Show it is fixed to the top */
             body {
@@ -79,7 +81,7 @@
             }
 
             async function addContainersToModalWindowBody() {
-                var divsToAdd = ['obsPlotCont', 'obsDeltaPlotCont', 'obsChangePlotCont', 'inProgressCont'];
+                var divsToAdd = ['obsPlotButtonsCont','obsPlotCont', 'obsDeltaPlotCont', 'obsChangePlotCont', 'inProgressCont'];
                 for (let j=0; j<divsToAdd.length; j++) {
                     let newDiv = document.createElement('div');
                     newDiv.classList.add('container-fluid');
@@ -89,6 +91,27 @@
                 return true
             }
 
+            async function addChart(serieAsArray,containerInScope) {
+                                
+                function drawChart() {
+                    var data = google.visualization.arrayToDataTable([['Year', 'Sales', 'Expenses'],
+                                                                      ['2004',  1000,      400],
+                                                                      ['2005',  1170,      460],
+                                                                      ['2006',  660,       1120],
+                                                                      ['2007',  1030,      540]]);
+
+                    var options = {title: 'Company Performance',
+                                   curveType: 'function',
+                                   legend: { position: 'bottom' }};
+                    var chart = new google.visualization.LineChart(document.getElementById(containerInScope));
+                    chart.draw(data, options);
+                };
+
+                google.charts.load('current', {'packages':['corechart']});
+                google.charts.setOnLoadCallback(drawChart);
+
+            }
+
             console.log(id, shortName)
             var result;
             var modalWindow = new bootstrap.Modal(document.getElementById("modalWindow"), {});
@@ -96,13 +119,19 @@
                 modalWindowTitle.innerText = id + ' - ' + shortName;
                 modalWindow.show();
                 result = await deleteChildsInModalWindowBody();
-                result = await addDivs();
+                result = await addContainersToModalWindowBody();
                 console.log(id)
                 if (sessionStorage.getItem(id) !== null) {
                     let serieInScope = sessionStorage.getItem(id);
-                    console.log(serieInScope)
+                    if (typeof(serieInScope) !== 'undefined' || serieInScope !== null) {
+                        seriesObject = JSON.parse(serieInScope)
+                        obs = seriesObject['obs'];
+                        addChart(obs,'obsPlotCont')   // adds plot to obsPlotCont
+                        obsDelta = seriesObject['obsDelta'];
+                        obsChange = seriesObject['obsChange'];
+                        console.log(obs, obsDelta, obsChange)
+                    }
                 }
-               
             }
         }
 
@@ -149,7 +178,7 @@
             newSeriesObject = {'newObs': newObs,
                                'newObsDelta': newObsDelta,
                                'newObsChange': newObsChange}
-            //console.log('new series object ', newSeriesObject)
+            //
             return newSeriesObject;
         } // end of - getNewSeriesFromIndices
 
@@ -266,7 +295,6 @@
                 let delta = serieObject['obsDelta'][serieObject['obsDelta'].length-1][1];
                 let change = serieObject['obsChange'][serieObject['obsChange'].length-1][1];
                 //
-                //console.log(lastPos)
                 let idInScope = serieObject['id'];
                 switch  (serieObject['id']) {
                     case 'SF61745':
@@ -353,13 +381,13 @@
             .then(function(response) {
                 if (response.status === 200) {
                     response.json().then(function(returnedJson) {
-                        //console.log(returnedJson)
+                        //
                         series = returnedJson['bmx']['series']
                         deleteChildsInAppContent()
                         addTable()
-                        //console.log(series)
+                        //
                         series.forEach(async(serie) => {
-                            //console.log(serie)
+                            //
                             let serieObject = await getDataFromBanxicoSIESerie(serie)
                             let serieId = serieObject['id']
                             if (yearlyIndices.includes(serie['idSerie'])) {
@@ -382,17 +410,9 @@
                             //
                             let serieKeyDataObject = await mapSeriesToTable(serieObject)
                             updateTable(serieKeyDataObject)
-                            //seriesKeyData.push(serieKeyDataObject)
                         });
                         appLoading.classList.replace('d-block', 'd-none')
                         appContent.classList.replace('d-none', 'd-block')
-                        //console.log(seriesKeyData)
-                        //let seriesKeyData = seriesKeyData.sort(function(a, b) {
-                        //    if (a.row > b.row) return 1;
-                        //    if (a.row < b.row) return -1;
-                        //    return 0;
-                        //});
-                        //console.log(seriesKeyData)
                     });
                 } else {
                     return null;
