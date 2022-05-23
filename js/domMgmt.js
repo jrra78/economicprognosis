@@ -1,3 +1,4 @@
+var sidebar = document.getElementById('sidebar');
 var appContent = document.getElementById('appContent');
 var appLoading = document.getElementById('appLoading');
 var modalWindowTitle = document.getElementById('modalWindowTitle');
@@ -32,8 +33,35 @@ function displayModalWindow() {
     }
 }
 
+function closeSideBar() {
+    let mySidebar = document.getElementById('sidebar')
+    if (typeof(mySidebar) !== 'undefined' || mySidebar !== null) {
+        let mySidebarInstance = bootstrap.Offcanvas.getInstance(mySidebar)
+        mySidebarInstance.hide()
+    }   
+}
+
+function offCanvasListener(offCanvasId) {
+    let myOffCanvas = document.getElementById(offCanvasId);
+  
+    const hideCanvas = () => {
+      let openedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+      openedCanvas.hide();
+      event.target.removeEventListener('mouseleave', hideCanvas);
+    }
+
+    const listenToMouseLeave = (event) => {
+      event.target.addEventListener('mouseleave', hideCanvas);
+    }
+    
+    myOffCanvas.addEventListener('shown.bs.offcanvas', listenToMouseLeave);
+}
+
 function addEventListeners() {
     //
+    sidebarCloseButton.addEventListener('click', function() {
+        closeSideBar()
+    })
     modalWindowCloseBtnHeader.addEventListener('click', function() {
         deleteChildsInModalWindowBodyContent()
         closeModalWindow();
@@ -42,7 +70,10 @@ function addEventListeners() {
         deleteChildsInModalWindowBodyContent();
         closeModalWindow();
     });
-    genericButton.addEventListener('click', function() {displayModalWindow();});
+    genericButton.addEventListener('click', function() {
+        displayModalWindow();
+    });
+    offCanvasListener('sidebar')
 }
 
 document.addEventListener('DOMContentLoaded', () => {
