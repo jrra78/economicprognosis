@@ -83,35 +83,39 @@
 
         <main id="main" class="container">
 
-            <div id="appLoading" class="d-block bg-light p-1 rounded" style="width:100%;">
+            <div id="appLoading" class="d-none bg-light p-1 rounded" style="width:100%;">
                 <div class="container text-center" style="width:100%;">
                     <img class ="mx-auto d-block" src="https://cdn.jsdelivr.net/gh/jrra78/images@main/gif/bar.gif">
                 </div>
             </div>
 
             <div id="appContent" class="d-block bg-light p-1 rounded" style="width:100%;">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalWindow">
-                    Open modal window
-                </button>
+                <button id="genericButton" type="button" class="btn btn-primary">Open modal window</button>
             </div>
 
         </main>
 
         <div class="modal fade" id="modalWindow">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h4 class="modal-title">Modal Heading</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <h4 id='modalWindowTitle' class="modal-title">Modal Heading</h4>
+                        <button id="modalWindowCloseBtnHeader" type="button" class="btn-close"></button>
+
                     </div>
 
-                    <div class="modal-body">
-                        Modal body..
+                    <div id="modalWindowBody" class="modal-body">
+                        <div id="modalWindowBodyContent" class="container-fluid d-block"></div>
+                        <div id="modalWindowBodyContentInProgress" class="container-fluid d-block">
+                            <div class="container text-center" style="width:100%;">
+                                <img class ="mx-auto d-block" src="https://cdn.jsdelivr.net/gh/jrra78/images@main/gif/bar.gif">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                        <button id="modalWindowCloseBtnFooter" type="button" class="btn btn-dark">Close</button>
                     </div>
 
                 </div>
@@ -120,9 +124,6 @@
 
     </body>
 
-    <script>
-        var myModal = new bootstrap.Modal(document.getElementById("modalWindow"), {});
-        document.onreadystatechange = function () {myModal.show();};
-    </script>
+    <script type="text/javascript" src="js\domMgmt.js"></script>
 
 </html>
