@@ -9,6 +9,16 @@ var modalWindowCloseBtnFooter = document.getElementById('modalWindowCloseBtnFoot
 var genericButton = document.getElementById('genericButton');
 
 
+function deleteChildsInAppContent() {
+    if (appContent.hasChildNodes()==true) {
+        while (appContent.firstChild) {
+            appContent.removeChild(appContent.firstChild)
+        }
+    }
+    return true
+}
+
+
 function deleteChildsInModalWindowBodyContent() {
     if (modalWindowBodyContent.hasChildNodes()==true) {
         while (modalWindowBodyContent.firstChild) {
@@ -78,5 +88,4 @@ function addEventListeners() {
 
 document.addEventListener('DOMContentLoaded', () => {
     addEventListeners();
-
 })
