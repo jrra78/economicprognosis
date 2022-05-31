@@ -146,7 +146,6 @@ async function initialInsight(seriesInScope) {
                     let serieObject = await getDataFromBanxicoSIESerie(serie)
                     let serieId = serieObject['id']
                     if (yearlyIndices.includes(serie['idSerie'])) {
-                        console.log('its an index')
                         let newSeriesObject = await getNewSeriesFromIndices(serieObject);
                         serieObject['obs'] = newSeriesObject['newObs'];
                         serieObject['obsDelta'] = newSeriesObject['newObsDelta'];
@@ -154,11 +153,8 @@ async function initialInsight(seriesInScope) {
                     }
                     //
                     if (sessionStorage.getItem(serieId) === null) {
-                        console.log('does no exists')
-                        console.log(serieObject)
                         sessionStorage.setItem(serieId, JSON.stringify(serieObject))
                     } else {
-                        console.log('exists')
                         sessionStorage.removeItem(serieId)
                         sessionStorage.setItem(serieId, JSON.stringify(serieObject))
                     }

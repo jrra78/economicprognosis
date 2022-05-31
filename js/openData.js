@@ -1,6 +1,52 @@
 //
 var apiUrl = 'https://jrra.pythonanywhere.com';
 
+async function getNewSeriesFromIndices(serieObject) {
+    var newObs = new Array();
+    var newObsDelta = new Array();
+    var newObsChange = new Array();
+    //
+    for (let j=0;j<serieObject['obs'].length;j++) {
+        if (j>=12) {
+            if (serieObject['obs'][j][1] !== null && serieObject['obs'][j-12][1] !== null) {
+                let delta = serieObject['obs'][j][1]-serieObject['obs'][j-12][1];
+                let change = 1e2*delta/(serieObject['obs'][j-12][1]);
+                newObs.push([serieObject['obs'][j][0], change])
+            } else {
+                newObs.push([serieObject['obs'][j][0], null])
+            }
+        } else {
+            newObs.push([serieObject['obs'][j][0], null])
+        }
+    }
+    //
+    newObsDelta.push([newObs[0][0], null])
+    for (let j=1;j<newObs.length; j++) {
+        let delta = null;
+        if (newObs[j-1][1] !== null && newObs[j][1] !== null) {
+            delta = newObs[j][1]-newObs[j-1][1];
+        }
+        newObsDelta.push([newObs[j][0], delta])
+    }
+    //
+    newObsChange.push([newObsDelta[0][0], null])
+    for (let j=1; j<newObsDelta.length; j++) {
+        if (newObsDelta[j][1] !== null && newObs[j-1][1] !== null) {
+            let sign = Math.sign(newObsDelta[j][1])
+            let change = 100*(Math.abs(newObsDelta[j][1])/Math.abs(newObs[j-1][1]))
+            newObsChange.push([newObsDelta[j][0], sign*change])
+        } else  {
+            newObsChange.push([newObsDelta[j][0], null])
+        }
+    }
+    //  
+    newSeriesObject = {'newObs': newObs,
+                       'newObsDelta': newObsDelta,
+                       'newObsChange': newObsChange}
+    //
+    return newSeriesObject;
+} // end of - getNewSeriesFromIndices
+
 async function getDataFromBanxicoSIESerie(serie) {
     //console.log(serie)
     var todayDate = Date.now();
