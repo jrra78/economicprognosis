@@ -1,16 +1,6 @@
-var apiUrl = 'https://jrra.pythonanywhere.com';
+//
 
 async function initialInsight(seriesInScope) {
-
-    function deleteChildsInAppContent() {
-        var e = document.getElementById('appContent')
-        var child = e.lastElementChild;
-        while (child) {
-            e.removeChild(child)
-            child.lastElementChild;
-        }
-        return true;
-    }
 
     function addTable() {
         var container = document.getElementById('appContent');
