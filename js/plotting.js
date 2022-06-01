@@ -1,4 +1,5 @@
 //
+
 async function plotSeries(id, shortName) {
             
     async function deleteChildsInModalWindowBody() {
